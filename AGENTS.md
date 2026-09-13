@@ -8,6 +8,7 @@
 - 仓库内配置、相对路径文档、锁文件和 `.agents/skills/` 是跨电脑开发依据，不依赖某位开发者的绝对路径或本机已安装 skill。工作区装配方法见 [跨电脑开发](design/workspace.md)。
 - 修改前检查 Git 状态并保留已有修改。前后端契约变更必须同时核对 Go 路由、Handler/DTO、OpenAPI、前端 API/类型和测试；后端数据库设计与审批以其 `AGENTS.md` 为准。
 - README 记录当前实现，设计文档记录契约，计划不作为功能已完成的证据。用户当前要求前端先完成真实登录、身份恢复和退出，后续管理页面按确认的需求开发。
+- 接手时阅读后端仓库的 [统一交接与待确认清单](https://github.com/Vincentenxy/olixops-permission-center/blob/main/design/handoff.md)，本地对应后端 `design/handoff.md`。不确定事项集中记录事实、影响、当前处理及所需信息，不另复制清单；继续完成不依赖该事项的已授权工作。已确认决策不重复询问，待确认记录不视为授权，结论明确后更新且不记录敏感值。
 
 ## 架构与复用
 

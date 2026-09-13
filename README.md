@@ -4,6 +4,8 @@
 
 开发前阅读 [AGENTS.md](AGENTS.md)。后端仓库为 [olixops-permission-center](https://github.com/Vincentenxy/olixops-permission-center)。项目内携带 [Apple 设计及组件细节 skills](.agents/skills/README.md)，固定上游提交并保留 MIT 许可证。新电脑开发步骤见 [跨电脑工作区](design/workspace.md)，克隆后无需预先全局安装 skill。
 
+本次交付基线、尚未验证的环境和后续功能统一见后端的 [开发交接清单](https://github.com/Vincentenxy/olixops-permission-center/blob/main/design/handoff.md)；本地文件为后端仓库的 `design/handoff.md`。
+
 ## 启动与联调
 
 需要 Node.js 20.9+（推荐 Node.js 22）和 pnpm 10.11.1。首次安装使用固定版本：
