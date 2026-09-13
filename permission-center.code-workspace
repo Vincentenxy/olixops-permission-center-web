@@ -1,0 +1,6 @@
+{
+  "folders": [
+    { "name": "Permission Center · Web", "path": "." },
+    { "name": "Permission Center · API", "path": "../olixops-permission-center" }
+  ]
+}

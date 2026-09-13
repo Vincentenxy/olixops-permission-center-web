@@ -1,0 +1,51 @@
+{
+  "name": "olixops-permission-center-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.11.1",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "pnpm typecheck && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "typecheck": "vue-tsc --noEmit && tsc --noEmit -p tsconfig.node.json",
+    "lint": "eslint . --max-warnings 0",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "pnpm lint && pnpm test && pnpm build",
+    "format:check": "prettier --check src tests *.json *.ts *.js index.html"
+  },
+  "dependencies": {
+    "axios": "1.20.0",
+    "element-plus": "2.14.5",
+    "pinia": "3.0.4",
+    "vue": "3.5.42",
+    "vue-router": "4.6.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.4",
+    "@types/node": "22.19.15",
+    "@vitejs/plugin-vue": "5.2.4",
+    "@vue/test-utils": "2.4.6",
+    "eslint": "9.39.4",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-vue": "10.8.0",
+    "globals": "16.5.0",
+    "jsdom": "26.1.0",
+    "prettier": "3.8.1",
+    "sass": "1.97.3",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.56.1",
+    "vite": "6.4.3",
+    "vitest": "4.1.11",
+    "vue-tsc": "3.2.5"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

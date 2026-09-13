@@ -1,0 +1,14 @@
+node_modules
+dist
+.git
+.agents
+.env
+.env.*
+.idea
+.vscode
+*.pem
+*.key
+*.log
+coverage
+test-results
+playwright-report
