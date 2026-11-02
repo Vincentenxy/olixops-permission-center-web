@@ -6,6 +6,10 @@
 
 本次交付基线、尚未验证的环境和后续功能统一见后端的 [开发交接清单](https://github.com/Vincentenxy/olixops-permission-center/blob/main/design/handoff.md)；本地文件为后端仓库的 `design/handoff.md`。
 
+## 换电脑继续当前设计
+
+Apple 风格设计规则、`apple-design` / `emil-design-eng` 完整副本及 MIT 许可证均保存在 Git 中。新电脑先阅读 [设计规范](design/DESIGN.md)，再按 [skills 安装与验证说明](.agents/skills/README.md) 检查；缺少个人安装时可直接从仓库安装固定版本，文档同时提供 macOS/Linux 与 Windows PowerShell 命令。开发环境装配见 [跨电脑工作区](design/workspace.md)。
+
 ## 启动与联调
 
 需要 Node.js 20.9+（推荐 Node.js 22）和 pnpm 10.11.1。首次安装使用固定版本：

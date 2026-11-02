@@ -26,11 +26,13 @@ permission-workspace/
 4. 前端执行 `pnpm install --frozen-lockfile`，按 README 设置开发代理后运行 `pnpm dev`。使用刚创建的管理员登录；密码只在自己的环境中输入。
 5. 修改后在后端运行 `go vet ./...`、`go test ./...`、`go build ./...`，在前端运行 `pnpm check`；接口变更需在两个仓库同步验证。
 
-## Skill 的可移植性
+## 新电脑的设计 skills
 
 本项目实际使用的 `apple-design` 与 `emil-design-eng` 已完整保存在 `.agents/skills/`，包含上游固定提交与 MIT 许可证。根 `AGENTS.md` 要求后续 Agent 按任务读取这些相对路径，因此不依赖本机全局安装或联网下载。
 
-如果还想在其他项目使用，可以把这两个目录复制到个人 Agent 的 skills 目录；不覆盖已有同名版本，先比较版本再决定是否升级。本机 Codex 已另外安装同一版本，新电脑的全局安装是可选步骤，不是开发此项目的前置条件。
+开始界面开发前，按 [设计 skills 安装与验证](../.agents/skills/README.md) 检查文件和个人安装情况。该文档是安装步骤的唯一维护位置，包含 macOS/Linux 与 Windows PowerShell 的离线安装、`CODEX_HOME` 目录选择、已有版本处理和一致性验证。
+
+新电脑缺少全局 skills 时可直接从仓库副本安装；网络不可用也能沿用同一版本。项目设计依据为 [design/DESIGN.md](DESIGN.md) 和公共样式 token，Agent 必须读取本项目副本，不因全局缺失或版本不同改变界面风格。
 
 ## 配置边界
 

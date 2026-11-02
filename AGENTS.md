@@ -39,8 +39,9 @@
 
 ## 界面与设计 skill
 
-- 本项目使用 Apple 风格：系统字体、清晰文字层级、克制色彩、适量半透明层次、明确反馈和充足留白。实际实现以 [design/DESIGN.md](design/DESIGN.md) 和公共样式 token 为准。
+- 用户已确认后续页面采用简洁、明了的 Apple 风格。开发或评审登录、列表、详情、表单与交互状态前，阅读 [design/DESIGN.md](design/DESIGN.md) 的设计语言及管理页面应用规则，并复用公共样式 token。
 - 开始 UI 或交互工作前完整阅读仓库内 [apple-design](.agents/skills/apple-design/SKILL.md)；涉及组件细节或动画同时阅读 [emil-design-eng](.agents/skills/emil-design-eng/SKILL.md)。不要求联网安装最新版；固定上游版本与许可证见 [.agents/skills/README.md](.agents/skills/README.md)。
+- 新电脑或缺少全局设计 skills 时，先阅读 [安装与验证说明](.agents/skills/README.md)，按需安装项目固定副本并验证一致性；已有同名版本先比较。项目内 skill 与设计规范始终作为开发依据。
 - Skill 的 React/Swift 示例只借鉴原则，本仓库使用 Vue。用户明确要求和本仓库认证、安全、loading 规范优先，不因动画而解除提交防重复控制。
 - 主题颜色、圆角、阴影和间距集中在 `src/assets/styles/`，不能为不同页面复制相同规则。弹框圆角 16px；底部按钮高 32px、最小宽 58px、水平 padding 16px、间距 10px、圆角 16px。普通确认蓝色 `#176dfb`，危险操作用 danger 红色。
 - 二次确认使用 Element Plus 统一封装/公共类，不手写重复确认弹窗；提交时确认展示 loading、取消禁用。
