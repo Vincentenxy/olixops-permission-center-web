@@ -1,6 +1,6 @@
 # OlixOps Permission Center Web
 
-独立权限中心的管理前端。当前已实现用户名密码登录、身份确认、账号概览、刷新恢复会话、退出登录，以及认证失效处理。租户、系统、管理员和审计的管理页面将在后续接入；当前不展示虚构统计或占位导航。
+独立权限中心的管理前端。当前已实现用户名密码登录、身份恢复、租户与租户管理员、平台管理员、接入系统与固定 Token、管理审计，以及认证失效处理。平台超管可维护全局资源，租户管理员只能看到后端授权范围内的租户、系统和审计；页面不推断或扩大权限。
 
 开发前阅读 [AGENTS.md](AGENTS.md)。后端仓库为 [olixops-permission-center](https://github.com/Vincentenxy/olixops-permission-center)。项目内携带 [Apple 设计及组件细节 skills](.agents/skills/README.md)，固定上游提交并保留 MIT 许可证。新电脑开发步骤见 [跨电脑工作区](design/workspace.md)，克隆后无需预先全局安装 skill。
 
@@ -46,26 +46,29 @@ pnpm dev
 - 请求取消和会话版本检查防止退出后迟到响应重新登录；旧会话的 401 不能退出后来建立的新会话。返回地址只允许已实现的内部工作空间路径。
 - 503 或网络失败展示重试状态，不能伪装为认证失效，也不能展示尚未确认的账号信息。
 
-分页公共类型为 `PageRequest { pageNum?, pageSize? }` 和 `PageResp<T> { total, list }`。后端负责归一化 pageNum/pageSize 为 1/20，上限 200；响应不回显分页参数，空列表用 `[]`。当前登录阶段没有分页接口调用。
+分页公共类型为 `PageRequest { pageNum?, pageSize? }` 和 `PageResp<T> { total, list }`。列表请求统一提交 `pageNum/pageSize`，后端负责归一化为 1/20、上限 200；响应只读取 `total/list`，不依赖后端回显分页参数，空列表用 `[]`。
+
+管理页面统一通过 `src/api/management.ts` 调用后端既有接口。租户管理员范围使用 `/auth/tenant/list`，Token 创建入口使用 `/system/credential/checkCreate` 展示后端实时资格，前端状态不能替代写事务复查。创建系统 Token 时完整明文只在不可点击遮罩关闭的一次性对话框中短暂展示，关闭后立即清空；列表只保留 `keyId` 和状态等元数据。平台管理员页面同时受导航隐藏和路由守卫保护，实际授权仍以后端为准。
 
 ## 目录与设计
 
 ```text
 src/
-├── api/                 # 唯一 HTTP 实例、认证 API
+├── api/                 # 唯一 HTTP 实例、认证与管理 API
 ├── assets/styles/       # 设计变量、公共控件、页面样式
-├── components/common/   # 品牌等无业务依赖组件
+├── components/common/   # 应用壳、页面标题、状态、空态、敏感 Token 对话框
+├── composables/         # 可复用分页列表状态与并发取消
 ├── router/              # 路由、认证守卫、页面标题
 ├── stores/              # 共享认证会话
 ├── types/               # API / 分页 / 认证类型
 ├── utils/               # 令牌存储、通知、安全返回地址
-└── views/               # 登录和账号工作空间
+└── views/               # 登录、概览、租户、管理员、系统、审计
 tests/                   # 请求层、会话、登录、路由行为测试
 deploy/                  # Nginx 同源代理模板
 .agents/skills/          # 可随仓库携带的设计 skills
 ```
 
-使用 Vue 3、TypeScript、Vite、Pinia、Vue Router、Element Plus、Axios 和 Sass。运行与工具依赖以 `package.json` 和 `pnpm-lock.yaml` 为准；没有为简单登录交互引入动画库。Element Plus 按需导入按钮与提示，表单保持原生 label、autocomplete 和键盘操作。
+使用 Vue 3、TypeScript、Vite、Pinia、Vue Router、Element Plus、Axios、Lucide 和 Sass。运行与工具依赖以 `package.json` 和 `pnpm-lock.yaml` 为准；没有为管理交互引入动画库。表单保持真实 label、自动填充语义和键盘操作，工具操作使用带可访问名称的 Lucide 图标。
 
 UI 以系统字体、浅灰底色、克制的蓝色强调、适量留白和玻璃顶栏呈现 Apple 风格。统一变量位于 `tokens.scss`，共享控件位于 `components.scss`。按压反馈不延迟请求、不阻塞键盘操作，支持减少动画、减少透明度和增强对比度偏好。错误内联且有可访问提示，密码图标保留 aria-label 和 aria-pressed；所有请求均有 loading，提交时禁止重复提交。
 
@@ -98,8 +101,8 @@ git diff --check
 
 本次初始化实际验证：
 
-- `pnpm check` 通过：5 个测试文件、34 个行为测试、ESLint、应用与配置类型检查、生产构建均通过。
+- `pnpm check` 通过：6 个测试文件、41 个行为测试、ESLint、应用与配置类型检查、生产构建均通过。
 - `pnpm audit` 返回 0 个已知漏洞，运行依赖与开发依赖均已检查；测试工具使用修复后的 Vitest 4.1.11。
 - 使用隔离 PostgreSQL 与真实 Go 后端完成浏览器联调：错误密码仅显示一条内联错误、正确登录、刷新恢复身份、退出，以及退出后直接访问 `/workspace` 返回登录。
-- 检查桌面与 390×844 窄屏的登录和账号页面；浏览器控制台没有 error / warn。
+- 原登录与账号页面已检查桌面及 390×844 窄屏；本次新增管理页面完成自动化检查和生产构建，仍需在连接真实后端后补充完整浏览器业务流验收。
 - 容器构建和 Kubernetes 部署未在本次前端检查中执行；上述浏览器联调使用 Vite 开发代理，不能替代部署环境验证。

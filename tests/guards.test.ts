@@ -17,9 +17,15 @@ function setup() {
       { path: '/login', name: 'Login', component: {}, meta: { title: '登录' } },
       {
         path: '/workspace',
-        name: 'Workspace',
+        name: 'WorkspaceHome',
         component: {},
         meta: { requiresAuth: true, title: '我的工作空间' },
+      },
+      {
+        path: '/workspace/users',
+        name: 'Users',
+        component: {},
+        meta: { requiresAuth: true, platformAdmin: true, title: '管理员' },
       },
     ],
   })
@@ -46,7 +52,7 @@ describe('认证路由守卫', () => {
     const router = setup()
     await router.push('/login')
     expect(getProfile).toHaveBeenCalledTimes(1)
-    expect(router.currentRoute.value.name).toBe('Workspace')
+    expect(router.currentRoute.value.name).toBe('WorkspaceHome')
   })
 
   it('后端拒绝旧 token 时回到登录而非进入工作空间', async () => {
@@ -55,6 +61,32 @@ describe('认证路由守卫', () => {
     const router = setup()
     await router.push('/workspace')
     expect(router.currentRoute.value.name).toBe('Login')
+  })
+
+  it('租户管理员不能进入平台管理员页面', async () => {
+    setToken('fictional-token')
+    vi.mocked(getProfile).mockResolvedValue({
+      userId: 'tenant-admin',
+      username: 'tenant-admin',
+      name: '租户管理员',
+      platformRole: 'none',
+    })
+    const router = setup()
+    await router.push('/workspace/users')
+    expect(router.currentRoute.value.name).toBe('WorkspaceHome')
+  })
+
+  it('平台超管可以进入管理员页面', async () => {
+    setToken('fictional-token')
+    vi.mocked(getProfile).mockResolvedValue({
+      userId: 'platform-admin',
+      username: 'platform-admin',
+      name: '平台管理员',
+      platformRole: 'platform_admin',
+    })
+    const router = setup()
+    await router.push('/workspace/users')
+    expect(router.currentRoute.value.name).toBe('Users')
   })
 
   it.each([

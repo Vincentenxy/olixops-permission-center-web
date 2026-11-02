@@ -10,6 +10,9 @@ export function installGuards(router: Router, pinia: Pinia): void {
     if (to.meta.requiresAuth && !auth.token) {
       return { name: 'Login', query: { redirect: to.path } }
     }
+    if (to.meta.platformAdmin && auth.user?.platformRole !== 'platform_admin') {
+      return { name: 'WorkspaceHome' }
+    }
     if (to.name === 'Login' && auth.token) return loginDestination(to.query.redirect)
   })
   router.afterEach((to) => {

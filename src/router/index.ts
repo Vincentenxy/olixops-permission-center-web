@@ -12,9 +12,40 @@ export const router = createRouter({
     },
     {
       path: '/workspace',
-      name: 'Workspace',
-      component: () => import('../views/WorkspaceView.vue'),
-      meta: { title: '我的工作空间', requiresAuth: true },
+      component: () => import('../components/common/AppShell.vue'),
+      meta: { requiresAuth: true },
+      children: [
+        {
+          path: '',
+          name: 'WorkspaceHome',
+          component: () => import('../views/WorkspaceView.vue'),
+          meta: { title: '概览', requiresAuth: true },
+        },
+        {
+          path: 'tenants',
+          name: 'Tenants',
+          component: () => import('../views/TenantsView.vue'),
+          meta: { title: '租户', requiresAuth: true },
+        },
+        {
+          path: 'users',
+          name: 'Users',
+          component: () => import('../views/UsersView.vue'),
+          meta: { title: '管理员', requiresAuth: true, platformAdmin: true },
+        },
+        {
+          path: 'systems',
+          name: 'Systems',
+          component: () => import('../views/SystemsView.vue'),
+          meta: { title: '系统接入', requiresAuth: true },
+        },
+        {
+          path: 'audits',
+          name: 'Audits',
+          component: () => import('../views/AuditsView.vue'),
+          meta: { title: '审计', requiresAuth: true },
+        },
+      ],
     },
     { path: '/:pathMatch(.*)*', redirect: '/workspace' },
   ],

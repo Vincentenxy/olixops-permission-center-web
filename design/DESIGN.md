@@ -2,9 +2,11 @@
 
 ## 本期流程
 
-登录页输入用户名和密码 → 后端校验本地有效用户并签发 JWT → 显示已认证账户概览。刷新时调用 `/auth/me` 重新确认身份；退出后回到登录页。用户名密码错误在表单内提示，服务不可用保留重试机会。
+登录页输入用户名和密码 → 后端校验本地有效用户并签发 JWT → 进入管理工作台。刷新时调用 `/auth/me` 重新确认身份；退出后回到登录页。用户名密码错误在表单内提示，服务不可用保留重试机会。
 
-本期没有注册、忘记密码、第三方登录或管理业务页面，不展示无法执行的按钮、虚构统计数据或虚构租户。首个超管通过后端离线命令创建。
+工作台包含概览、租户、管理员、系统接入和审计。平台超管维护后台用户、租户及成员关系；租户管理员维护授权范围内的系统与固定 Token。后端返回的范围是最终边界，前端不从 `platformRole=none` 推断租户关系。首个超管仍通过后端离线命令创建。
+
+本期没有注册、忘记密码、第三方登录、系统 Token 轮换或 SpiceDB 授权关系页面。SpiceDB Schema、通用动作命名和关系写入接口确认前，不展示虚构授权能力。
 
 ## 设计语言
 
@@ -31,13 +33,19 @@
 
 ## 前后端契约
 
-| 接口 | 请求 | 成功 data |
-|---|---|---|
-| POST `/api/v1/pub/auth/login` | `{username,password}` | `{accessToken,expiresAt,user}` |
-| GET `/api/v1/auth/me` | Bearer JWT | `{userId,username,name,platformRole}` |
+| 接口                                         | 请求                             | 成功 data                             |
+| -------------------------------------------- | -------------------------------- | ------------------------------------- |
+| POST `/api/v1/pub/auth/login`                | `{username,password}`            | `{accessToken,expiresAt,user}`        |
+| GET `/api/v1/auth/me`                        | Bearer JWT                       | `{userId,username,name,platformRole}` |
+| POST `/api/v1/auth/tenant/list`              | `{pageNum,pageSize,code?,name?}` | `{total,list}`                        |
+| POST `/api/v1/system/credential/checkCreate` | `{systemId}`                     | `{allowed,reason}`                    |
 
 `user` 与 `/auth/me` 返回一致。`platformRole` 为 `platform_admin/none`，租户管理员来自后台成员关系，不由这个字段替代。所有返回使用 `{code,msg,data}`，API 类型与实际 OpenAPI 同步。
 
 成功登录写入当前标签页会话；不能记录密码。前端退出清除标签页凭据；后端 JWT 在到期或用户停用前仍有效，本期没有跨设备会话撤销或 refresh token。
 
-后台系统调用密钥不是管理员 JWT：固定密钥、不自动到期、不实现轮换，只能由系统所属租户的有效管理员创建；后续密钥页面只允许短暂展示创建结果，不保存明文。
+后台系统调用密钥不是管理员 JWT：固定密钥、不自动到期、不实现轮换，只能由系统所属租户的有效管理员创建。完整 Token 只在创建成功后短暂显示一次；关闭对话框立即清空，列表与持久状态只保存元数据。
+
+管理列表请求使用 `pageNum/pageSize`，响应使用 `total/list`。普通接口错误由统一请求层提示一次，页面只维护 loading、空态和本地校验，不重复弹出后端错误。
+
+平台超管的全局租户列表与账号实际具备的租户管理员关系必须分开查询。Token 签发资格原因是当前快照，仅用于解释界面状态；创建请求仍以后端事务内复查为准。

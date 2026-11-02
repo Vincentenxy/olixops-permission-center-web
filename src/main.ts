@@ -5,7 +5,7 @@ import { router } from './router'
 import { installGuards } from './router/guards'
 import { useAuthStore } from './stores/auth'
 import { onSessionInvalidated } from './utils/token'
-import 'element-plus/theme-chalk/base.css'
+import 'element-plus/dist/index.css'
 import './assets/styles/main.scss'
 
 const app = createApp(App)
