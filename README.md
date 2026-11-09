@@ -4,11 +4,11 @@
 
 开发前阅读 [AGENTS.md](AGENTS.md)。后端仓库为 [olixops-permission-center](https://github.com/Vincentenxy/olixops-permission-center)。项目内携带 [Apple 设计及组件细节 skills](.agents/skills/README.md)，固定上游提交并保留 MIT 许可证。新电脑开发步骤见 [跨电脑工作区](design/workspace.md)，克隆后无需预先全局安装 skill。
 
-前后端统一交接入口为后端的 [开发交接清单](https://github.com/Vincentenxy/olixops-permission-center/blob/main/design/handoff.md)，更新日期为 2026-11-06；本地文件为后端仓库的 `design/handoff.md`。待确认事项集中在那里维护，前端不另复制一份状态清单。
+前后端统一交接入口为后端的 [开发交接清单](https://github.com/Vincentenxy/olixops-permission-center/blob/main/design/handoff.md)，更新日期为 2026-11-10；本地文件为后端仓库的 `design/handoff.md`。待确认事项集中在那里维护，前端不另复制一份状态清单。
 
 ## 当前开发进度
 
-截至 2026-11-06，管理前端代码已完成并接入后端既有 API；后端的 SpiceDB 部分完成设计与离线模型验证，业务授权接口及其前端页面尚未实现。
+截至 2026-11-10，管理前端代码已完成并接入后端既有 API；后端的 SpiceDB 首版直接授权已实现，含目录登记、grant/revoke、可靠任务及 HTTP/gRPC 单次/批量查询，已完成隔离真实服务验证。授权管理页面尚未开发，下一步先补其所需的后端读取契约，再接页面。
 
 | 页面/能力 | 路径 | 当前实现与代码 |
 |---|---|---|
@@ -24,15 +24,15 @@
 
 尚未开发：业务主体、资源类型、动作、角色成员、资源登记、grant/revoke、权限测试、可靠写入任务状态和可访问资源列表页面；SSO/checkSelf、SDK、注册/找回密码、refresh token、跨设备撤销、Token 轮换也未实现。现有“租户管理员”是后台管理身份，不等同于未来 SpiceDB 的业务角色。
 
-后端已完成的模型工作见 [权限模型 README](https://github.com/Vincentenxy/olixops-permission-center/blob/main/authorization/README.md)：独立 Schema、7 组快照、37 条断言，其中包含 4 条非法写入风险复现。它证明规则的离线计算行为，不代表前端已经能授权，或实际服务已具备隔离及在线撤权保证。浏览器不能持有 SpiceDB 服务凭据，也不能以系统 Token 代替管理员 JWT 操作后台或直接调用授权引擎。
+后端模型与验证边界见 [权限模型 README](https://github.com/Vincentenxy/olixops-permission-center/blob/main/authorization/README.md)：独立 Schema、7 组快照、37 条断言，其中包含 4 条非法写入风险复现。离线断言只证明模型语义；另有真实后端授权/撤权及恢复测试，具体证据见统一交接清单，不代表前端已能操作授权或生产已部署。浏览器不能持有 SpiceDB 服务凭据，也不能以系统 Token 代替管理员 JWT 操作后台或直接调用授权引擎。
 
 ## AI 接手顺序
 
 1. 阅读本仓库 `AGENTS.md`、本 README、[设计规范](design/DESIGN.md)，再阅读后端 `AGENTS.md`、README 和统一交接清单。开始 UI 工作前读取仓库内设计 skills；不必重新初始化已存在页面。
 2. 拉取前后端代码并检查各自 Git 状态。按 [工作区说明](design/workspace.md) 准备真实环境，勿依赖此前机器的端口、进程、临时账号或本地配置。
-3. 先处理管理流真实环境验收；核心授权页面需等后端表设计审批及正式接口契约。当前 `permission.proto` 是占位，不据此构建可用授权页面或伪造 API。
+3. 阅读后端 [授权 API](https://github.com/Vincentenxy/olixops-permission-center/blob/main/design/authorization-api.md) 和 [OpenAPI](https://github.com/Vincentenxy/olixops-permission-center/blob/main/api/authorization.openapi.yaml)。九表及首版接口已确认并实现，先补主体/类型/动作/资源/任务列表及系统授权状态等读取接口，再开发页面。正式查询使用 `authorization.v1`；旧 `permission.v1` 仍为未注册占位。具体接手顺序见统一交接清单第 0 节。
 4. 扩展接口时复用 [management.ts](src/api/management.ts) 的封装模式、[http.ts](src/api/http.ts) 的统一入口及 [use-paged-list.ts](src/composables/use-paged-list.ts)；类型集中维护，跨协议业务校验由后端负责。
-5. 核心授权首个验收目标：租户管理员在系统 A 给主体授予 folder/read，后端 HTTP/gRPC 均允许；撤权任务生效后均拒绝。角色和范围继承、列表及 SSO 分阶段扩展，页面需区分待生效、正常无权与依赖不可用。
+5. 现有系统查询仅接受后端保管的系统密钥，浏览器权限测试需先补管理员身份的专用接口；不能让浏览器保存系统密钥。核心授权首个验收目标：租户管理员在系统 A 给主体授予 folder/read，后端 HTTP/gRPC 均允许；撤权任务生效后均拒绝。角色和范围继承、列表及 SSO 分阶段扩展，页面需区分待生效、正常无权与依赖不可用。
 6. API 变更同步后端 OpenAPI、前端类型/API/测试，执行 `pnpm check`，完成真实浏览器验证，再分别提交两个仓库并更新统一交接清单。
 
 ## 换电脑继续当前设计
@@ -137,3 +137,5 @@ git diff --check
 - 容器构建和 Kubernetes 部署未在本次前端检查中执行；上述浏览器联调使用 Vite 开发代理，不能替代部署环境验证。
 
 2026-11-06 本轮只整理 README、规范中的旧阶段描述及统一交接入口，未修改前端业务代码。文档相对链接、源码路径、前后端状态和 `git diff --check` 检查结果记录于后端统一交接清单；未启动或确认旧预览进程，不承诺本地预览地址持续可用。
+
+2026-11-10 交接更新：同步已实现的核心授权后端与前端待开发范围，重新执行 pnpm check 通过（6 个文件、41 项测试，lint、类型和构建通过）。本轮未修改前端业务代码，未重新执行浏览器业务流或部署验收；最新开发顺序、本机预览与新电脑初始化边界集中维护于后端统一交接清单第 0 节。
