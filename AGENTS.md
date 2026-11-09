@@ -7,7 +7,7 @@
 - 这是独立权限中心前端，后端仓库为 `https://github.com/Vincentenxy/olixops-permission-center`。Env Vault 仅是技术和交互规范参考，不是本项目的后端，不复制其主密钥、Secret、专用错误码或权限占位模型。
 - 仓库内配置、相对路径文档、锁文件和 `.agents/skills/` 是跨电脑开发依据，不依赖某位开发者的绝对路径或本机已安装 skill。工作区装配方法见 [跨电脑开发](design/workspace.md)。
 - 修改前检查 Git 状态并保留已有修改。前后端契约变更必须同时核对 Go 路由、Handler/DTO、OpenAPI、前端 API/类型和测试；后端数据库设计与审批以其 `AGENTS.md` 为准。
-- README 记录当前实现，设计文档记录契约，计划不作为功能已完成的证据。登录、身份恢复、退出及租户/管理员/系统/固定 Token/审计页面已实现；新增管理页面仍需真实环境完整验收。SpiceDB 授权页面后续按后端正式契约开发，不重新初始化或覆盖既有管理页面。
+- README 记录当前实现，设计文档记录契约，计划不作为功能已完成的证据。既有管理工作台和首版 SpiceDB 授权页面已实现；授权浏览器流程有隔离服务验证，业务部署仍需验收。不重新初始化或覆盖既有页面；后续范围先读后端交接第 0 节。
 - 接手时阅读后端仓库的 [统一交接与待确认清单](https://github.com/Vincentenxy/olixops-permission-center/blob/main/design/handoff.md)，本地对应后端 `design/handoff.md`。不确定事项集中记录事实、影响、当前处理及所需信息，不另复制清单；继续完成不依赖该事项的已授权工作。已确认决策不重复询问，待确认记录不视为授权，结论明确后更新且不记录敏感值。
 
 ## 架构与复用
@@ -16,6 +16,7 @@
 - HTTP 只能通过 `src/api/http.ts` 的统一实例发出，业务 API 在 `src/api/` 封装。页面、store、composable 不得新增请求实例，`api/` 不依赖 store。
 - 跨页面认证状态和远端缓存放 `stores/`，表单、弹框、临时查询结果在页面局部保存，可复用逻辑放 `composables/`，通用组件不依赖业务 store。
 - 同一功能和规则只写一处。新增逻辑先搜索现有能力，复用统一认证、请求、错误、分页和样式；语义不同的业务不强行塞进万能组件或通用 CRUD。
+- 授权异步命令统一使用现有 command/monitor composable。接受收据不等于生效，只有 applied 才显示生效；结果不确定时保留原 payload/幂等键，由用户显式恢复，不自动换键重写。关系 expectedVersion、任务 version 和 targetVersion 不混用。切用户/系统或离页后，迟到结果不得触发新写入或恢复旧状态。
 - 组件使用 `<script setup lang="ts">`，组件文件、类型和路由 name 用 PascalCase，工具/API/store/composable 文件用 kebab-case，字段 camelCase。未知数据使用 `unknown` 并收窄，避免 `any`。
 - 格式遵循 `.prettierrc.json`：2 空格、单引号、无分号、行宽 100。只格式化修改范围，不安装提交钩子。
 

@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import { ElLoading } from 'element-plus'
 import App from './App.vue'
 import { router } from './router'
 import { installGuards } from './router/guards'
@@ -11,6 +12,7 @@ import './assets/styles/main.scss'
 const app = createApp(App)
 const pinia = createPinia()
 app.use(pinia)
+app.directive('loading', ElLoading.directive)
 installGuards(router, pinia)
 onSessionInvalidated(() => {
   useAuthStore(pinia).logout()

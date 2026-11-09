@@ -8,6 +8,8 @@ export interface PagedList<T> {
   pageNum: Ref<number>
   pageSize: Ref<number>
   loading: Ref<boolean>
+  failed: Ref<boolean>
+  clear: () => void
   load: (reset?: boolean) => Promise<void>
   changePage: (page: number) => Promise<void>
   changePageSize: (size: number) => Promise<void>
@@ -21,6 +23,7 @@ export function usePagedList<T>(
   const pageNum = ref(1)
   const pageSize = ref(20)
   const loading = ref(false)
+  const failed = ref(false)
   let generation = 0
   let controller: AbortController | undefined
 
@@ -30,6 +33,7 @@ export function usePagedList<T>(
     controller?.abort()
     controller = new AbortController()
     loading.value = true
+    failed.value = false
     try {
       const result = await loader(pageNum.value, pageSize.value, controller.signal)
       if (current !== generation) return
@@ -41,6 +45,7 @@ export function usePagedList<T>(
       }
     } catch (error) {
       if (isRequestCanceled(error)) return
+      if (current === generation) failed.value = true
       // The shared HTTP layer owns user-facing errors; keep the last valid page visible.
     } finally {
       if (current === generation) loading.value = false
@@ -57,6 +62,29 @@ export function usePagedList<T>(
     await load(true)
   }
 
-  onBeforeUnmount(() => controller?.abort())
-  return { list, total, pageNum, pageSize, loading, load, changePage, changePageSize }
+  onBeforeUnmount(() => {
+    generation++
+    controller?.abort()
+  })
+  function clear(): void {
+    generation++
+    controller?.abort()
+    list.value = []
+    total.value = 0
+    pageNum.value = 1
+    loading.value = false
+    failed.value = false
+  }
+  return {
+    list,
+    total,
+    pageNum,
+    pageSize,
+    loading,
+    failed,
+    clear,
+    load,
+    changePage,
+    changePageSize,
+  }
 }

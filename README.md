@@ -1,6 +1,6 @@
 # OlixOps Permission Center Web
 
-独立权限中心的管理前端。当前已实现用户名密码登录、身份恢复、租户与租户管理员、平台管理员、接入系统与固定 Token、管理审计，以及认证失效处理。平台超管可维护全局资源，租户管理员只能看到后端授权范围内的租户、系统和审计；页面不推断或扩大权限。
+独立权限中心的管理前端。当前已实现登录、身份恢复、租户/管理员、系统/固定 Token、审计，以及首版 SpiceDB 直接授权管理。授权页面只使用当前账号实际有效的租户管理员关联，平台超管也不能绕过；页面不推断或扩大权限。
 
 开发前阅读 [AGENTS.md](AGENTS.md)。后端仓库为 [olixops-permission-center](https://github.com/Vincentenxy/olixops-permission-center)。项目内携带 [Apple 设计及组件细节 skills](.agents/skills/README.md)，固定上游提交并保留 MIT 许可证。新电脑开发步骤见 [跨电脑工作区](design/workspace.md)，克隆后无需预先全局安装 skill。
 
@@ -8,7 +8,7 @@
 
 ## 当前开发进度
 
-截至 2026-11-10，管理前端代码已完成并接入后端既有 API；后端的 SpiceDB 首版直接授权已实现，含目录登记、grant/revoke、可靠任务及 HTTP/gRPC 单次/批量查询，已完成隔离真实服务验证。授权管理页面尚未开发，下一步先补其所需的后端读取契约，再接页面。
+截至 2026-11-10，既有管理工作台保留，本轮先补后端六类分页、系统授权状态和管理员权限测试，再接入授权管理页面。首版直接授权已完成真实隔离服务与浏览器联调，角色/继承等扩展仍未开放。
 
 | 页面/能力 | 路径 | 当前实现与代码 |
 |---|---|---|
@@ -18,22 +18,33 @@
 | 平台管理员 | `/workspace/users` | 用户查询/创建/编辑/停用恢复、平台角色设置；导航和路由限制平台超管；`src/views/UsersView.vue` |
 | 系统接入 | `/workspace/systems` | 系统/账号状态、租户选择、固定 Token 资格查询/创建/吊销、明文仅一次展示；`src/views/SystemsView.vue` |
 | 审计 | `/workspace/audits` | 按后端授权范围筛选、分页、详情；`src/views/AuditsView.vue` |
+| 授权管理 | `/workspace/authorization` | 系统初始化、主体/类型/动作/资源登记、直接授权/撤权、任务与恢复、权限测试；`src/views/AuthorizationView.vue`、`src/components/authorization/` |
 | 公共能力 | 各页面共用 | 统一 Axios/ApiError、一次错误提示、会话恢复与 401 清理、分页/取消、公共壳和样式 token |
 
 已实现管理能力不等于已部署或已完成全部浏览器联调。登录/账号页面有真实后端浏览器验证记录；新增租户、管理员、系统、Token、审计管理流只完成自动化检查，仍需在实际后端/数据库环境验证桌面、窄屏、权限边界和错误状态。
 
-尚未开发：业务主体、资源类型、动作、角色成员、资源登记、grant/revoke、权限测试、可靠写入任务状态和可访问资源列表页面；SSO/checkSelf、SDK、注册/找回密码、refresh token、跨设备撤销、Token 轮换也未实现。现有“租户管理员”是后台管理身份，不等同于未来 SpiceDB 的业务角色。
+尚未开发：角色成员、父目录/类型范围继承、可访问资源列表、目录编辑/停用/删除、SSO/checkSelf、SDK、注册/找回密码、refresh token、跨设备撤销和 Token 轮换。现有“租户管理员”是后台管理身份，不等同于未来 SpiceDB 的业务角色。
 
-后端模型与验证边界见 [权限模型 README](https://github.com/Vincentenxy/olixops-permission-center/blob/main/authorization/README.md)：独立 Schema、7 组快照、37 条断言，其中包含 4 条非法写入风险复现。离线断言只证明模型语义；另有真实后端授权/撤权及恢复测试，具体证据见统一交接清单，不代表前端已能操作授权或生产已部署。浏览器不能持有 SpiceDB 服务凭据，也不能以系统 Token 代替管理员 JWT 操作后台或直接调用授权引擎。
+后端模型与验证边界见 [权限模型 README](https://github.com/Vincentenxy/olixops-permission-center/blob/main/authorization/README.md)：独立 Schema、7 组快照、37 条断言，其中包含 4 条非法写入风险复现。离线断言只证明模型语义；隔离后端及本轮浏览器验证的证据见统一交接清单，不代表生产已部署。浏览器不能持有 SpiceDB 服务凭据，也不能以系统 Token 代替管理员 JWT 操作后台或直接调用授权引擎。
 
 ## AI 接手顺序
 
 1. 阅读本仓库 `AGENTS.md`、本 README、[设计规范](design/DESIGN.md)，再阅读后端 `AGENTS.md`、README 和统一交接清单。开始 UI 工作前读取仓库内设计 skills；不必重新初始化已存在页面。
 2. 拉取前后端代码并检查各自 Git 状态。按 [工作区说明](design/workspace.md) 准备真实环境，勿依赖此前机器的端口、进程、临时账号或本地配置。
-3. 阅读后端 [授权 API](https://github.com/Vincentenxy/olixops-permission-center/blob/main/design/authorization-api.md) 和 [OpenAPI](https://github.com/Vincentenxy/olixops-permission-center/blob/main/api/authorization.openapi.yaml)。九表及首版接口已确认并实现，先补主体/类型/动作/资源/任务列表及系统授权状态等读取接口，再开发页面。正式查询使用 `authorization.v1`；旧 `permission.v1` 仍为未注册占位。具体接手顺序见统一交接清单第 0 节。
+3. 阅读后端 [授权 API](https://github.com/Vincentenxy/olixops-permission-center/blob/main/design/authorization-api.md) 和 [OpenAPI](https://github.com/Vincentenxy/olixops-permission-center/blob/main/api/authorization.openapi.yaml)。九表、首版读写接口与页面已实现，按交接第 0 节验收部署环境和确定后续范围，不重新初始化。正式 RPC 使用 `authorization.v1`；旧 `permission.v1` 仍为未注册占位。
 4. 扩展接口时复用 [management.ts](src/api/management.ts) 的封装模式、[http.ts](src/api/http.ts) 的统一入口及 [use-paged-list.ts](src/composables/use-paged-list.ts)；类型集中维护，跨协议业务校验由后端负责。
-5. 现有系统查询仅接受后端保管的系统密钥，浏览器权限测试需先补管理员身份的专用接口；不能让浏览器保存系统密钥。核心授权首个验收目标：租户管理员在系统 A 给主体授予 folder/read，后端 HTTP/gRPC 均允许；撤权任务生效后均拒绝。角色和范围继承、列表及 SSO 分阶段扩展，页面需区分待生效、正常无权与依赖不可用。
+5. 浏览器测试已使用管理员 JWT 专用 `/authorization/check`，系统查询仍仅接受后端保管的系统密钥。两者共享算法；前者不验证系统账号/Token 可用性。部署验收继续覆盖 grant applied 后允许、revoke applied 后拒绝、跨范围、版本冲突和依赖异常。角色/继承、Lookup 和 SSO 分阶段扩展。
 6. API 变更同步后端 OpenAPI、前端类型/API/测试，执行 `pnpm check`，完成真实浏览器验证，再分别提交两个仓库并更新统一交接清单。
+
+## 授权页面实现约定
+
+- 有效管理租户、系统和业务目录均使用远程分页/搜索，不将前 200 条当作完整目录。列表使用 `pageNum/pageSize → total/list`，切范围和离页取消请求并忽略迟到结果。
+- 初始化后依次登记主体、资源类型、动作、实例。类型 `resourceCount` 包含待登记资源，有实例后首版禁止新增动作；只有 ready 目录能选入授权/测试表单。
+- `use-authorization-command.ts` 按用户/系统保存同次命令的幂等键与不可变 payload。结果不确定时只提供显式重发，当前标签页可恢复；sessionStorage 被禁用时仅保留当前页面内存。明确拒绝后修正输入才产生新操作，不自动重发写请求。
+- `use-operation-monitor.ts` 以 500ms 至 5s 轮询，预算 60s；超时保留 operationId，可手动继续。只有 applied 表示生效，blocked 允许显式恢复；retry 使用 operation.version。
+- grant/revoke 先新查 relation/detail，首次仅明确 404 才用 expectedVersion=0；pending 禁止覆盖，冲突需刷新。声明列表不代表最终有效权限，权限测试失败时立即清除旧“允许”结果。
+- `PermissionFields`、远程 `DirectorySelect`、`ListPagination` 和确认框复用同一实现；普通错误由统一请求层提示一次。轮询/版本探测等 silent 请求使用局部状态，不重复弹错。
+- 本轮未变更数据库结构，复用后端现有九表和已批准 SQL。后续结构变更仍由后端同时交付完整初始化与单次 SQL。
 
 ## 换电脑继续当前设计
 
@@ -138,4 +149,4 @@ git diff --check
 
 2026-11-06 本轮只整理 README、规范中的旧阶段描述及统一交接入口，未修改前端业务代码。文档相对链接、源码路径、前后端状态和 `git diff --check` 检查结果记录于后端统一交接清单；未启动或确认旧预览进程，不承诺本地预览地址持续可用。
 
-2026-11-10 交接更新：同步已实现的核心授权后端与前端待开发范围，重新执行 pnpm check 通过（6 个文件、41 项测试，lint、类型和构建通过）。本轮未修改前端业务代码，未重新执行浏览器业务流或部署验收；最新开发顺序、本机预览与新电脑初始化边界集中维护于后端统一交接清单第 0 节。
+2026-11-10 授权页面交付：pnpm check 通过，8 个文件、55 项测试，含 lint、类型检查和生产构建。新增回归覆盖幂等恢复、范围切换/卸载、轮询预算、阻塞 retry 的任务版本、分页迟到结果、版本查询异常与旧允许结果清除。Chromium 连接隔离 PostgreSQL 16.4、SpiceDB v1.57.0 memory datastore 和真实 Go 后端，完成初始化、四类目录登记、grant 后允许、revoke 后拒绝；页面管理员入口与系统 Token 查询一致。检查桌面 1440px 和 390×844 窄屏，无整页横向溢出与应用运行错误。临时测试辅助入口未纳入产品，不分发测试账号或凭据；镜像、集群及实际业务环境部署仍未验收。最新接手顺序集中维护于后端交接第 0 节。

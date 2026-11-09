@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  ShieldCheck,
   Users,
   X,
 } from '@lucide/vue'
@@ -28,6 +29,7 @@ const navigation = computed(() => [
   { name: 'Tenants', label: '租户', icon: Building2, visible: true },
   { name: 'Users', label: '管理员', icon: Users, visible: isPlatformAdmin.value },
   { name: 'Systems', label: '系统接入', icon: KeyRound, visible: true },
+  { name: 'Authorization', label: '授权管理', icon: ShieldCheck, visible: true },
   { name: 'Audits', label: '审计', icon: Activity, visible: true },
 ])
 

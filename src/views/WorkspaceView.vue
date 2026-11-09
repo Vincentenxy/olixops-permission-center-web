@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
-import { Activity, ArrowRight, Building2, KeyRound, Users } from '@lucide/vue'
+import { Activity, ArrowRight, Building2, KeyRound, ShieldCheck, Users } from '@lucide/vue'
 import { ElButton } from 'element-plus'
 import PageHeader from '../components/common/PageHeader.vue'
 import StatusBadge from '../components/common/StatusBadge.vue'
@@ -30,6 +30,13 @@ const destinations = computed(() => [
     label: '系统接入',
     description: '维护调用账号和固定 Token',
     icon: KeyRound,
+    visible: true,
+  },
+  {
+    name: 'Authorization',
+    label: '授权管理',
+    description: '登记资源、分配权限与追踪任务',
+    icon: ShieldCheck,
     visible: true,
   },
   {

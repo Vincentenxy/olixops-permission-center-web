@@ -40,6 +40,12 @@ export const router = createRouter({
           meta: { title: '系统接入', requiresAuth: true },
         },
         {
+          path: 'authorization',
+          name: 'Authorization',
+          component: () => import('../views/AuthorizationView.vue'),
+          meta: { title: '授权管理', requiresAuth: true },
+        },
+        {
           path: 'audits',
           name: 'Audits',
           component: () => import('../views/AuditsView.vue'),
